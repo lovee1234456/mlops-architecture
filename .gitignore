@@ -3,3 +3,7 @@ __pycache__/
 .env 
 /features
 data/raw/customer_churn_1M.csv 
+feature_store/churn_repo/feature_repo/data/registry.db 
+feature_store/churn_repo/feature_repo/data/online_store.db 
+feature_store/churn_repo/feature_repo/__pycache__/ 
+feature_store/churn_repo/churn_repo/__pycache__/ 
