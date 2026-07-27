@@ -11,6 +11,11 @@ def train_model():
 
     train = pd.read_csv("features/train_features.csv")
     X_train = train.drop(columns=["churn", "customer_id", "event_timestamp"])
+
+    # Save the exact feature column list + order, so the API can match it exactly later
+    import json
+    with open("models/feature_columns.json", "w") as f:
+        json.dump(list(X_train.columns), f)
     y_train = train["churn"]
 
     # scale_pos_weight tells XGBoost how imbalanced the classes are (majority/minority ratio)
