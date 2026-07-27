@@ -1,7 +1,9 @@
 import mlflow
+import mlflow.xgboost
 import joblib
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+from sklearn.model_selection import GridSearchCV
 import dagshub
 
 def train_model():
@@ -11,16 +13,38 @@ def train_model():
     X_train = train.drop(columns=["churn", "customer_id", "event_timestamp"])
     y_train = train["churn"]
 
+    # scale_pos_weight tells XGBoost how imbalanced the classes are (majority/minority ratio)
+    scale_pos_weight = (y_train == 0).sum() / (y_train == 1).sum()
+
+    param_grid = {
+        "n_estimators": [100, 200],
+        "max_depth": [4, 6],
+    }
+
     with mlflow.start_run() as run:
-        params = {"n_estimators": 200, "max_depth": 8, "random_state": 42}
-        mlflow.log_params(params)
+        search = GridSearchCV(
+            XGBClassifier(random_state=42, scale_pos_weight=scale_pos_weight, eval_metric="logloss"),
+            param_grid,
+            cv=3,
+            scoring="f1",
+            n_jobs=-1,
+            verbose=2,
+        )
+        search.fit(X_train, y_train)
 
-        model = RandomForestClassifier(**params)
-        model.fit(X_train, y_train)
-        mlflow.sklearn.log_model(model, "model")
+        best_model = search.best_estimator_
+        mlflow.log_params(search.best_params_)
+        mlflow.log_metric("cv_best_f1", search.best_score_)
 
-        joblib.dump(model, "models/model.pkl")
+        for i, (params, mean_score) in enumerate(zip(search.cv_results_["params"], search.cv_results_["mean_test_score"])):
+            print(f"Trial {i}: {params} -> F1 = {mean_score:.4f}")
+
+        mlflow.xgboost.log_model(best_model, "model")
+        joblib.dump(best_model, "models/model.pkl")
+
         run_id = run.info.run_id
+        print(f"\nBest params: {search.best_params_}")
+        print(f"Best CV F1: {search.best_score_:.4f}")
         print(f"Training complete. Run ID: {run_id}")
         return {"run_id": run_id, "model_path": "models/model.pkl"}
 
