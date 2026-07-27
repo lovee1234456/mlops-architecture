@@ -39,10 +39,17 @@ def train_model():
         for i, (params, mean_score) in enumerate(zip(search.cv_results_["params"], search.cv_results_["mean_test_score"])):
             print(f"Trial {i}: {params} -> F1 = {mean_score:.4f}")
 
-        mlflow.xgboost.log_model(best_model, "model")
+        model_info = mlflow.xgboost.log_model(best_model, "model")
         joblib.dump(best_model, "models/model.pkl")
 
         run_id = run.info.run_id
+
+        # Register this run's model in the MLflow Model Registry, using the confirmed URI
+        result = mlflow.register_model(
+            model_uri=model_info.model_uri,
+            name="churn-classifier"
+        )
+        print(f"Registered as version {result.version} of 'churn-classifier'")
         print(f"\nBest params: {search.best_params_}")
         print(f"Best CV F1: {search.best_score_:.4f}")
         print(f"Training complete. Run ID: {run_id}")
