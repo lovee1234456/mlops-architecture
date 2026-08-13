@@ -9,7 +9,12 @@ import os
 
 def train_model():
     os.makedirs("models", exist_ok=True)
-    dagshub.init(repo_owner="loveenair28", repo_name="mlops-architecture", mlflow=True)
+    if os.environ.get("MLFLOW_TRACKING_USERNAME"):
+        # Running in CI (GitHub Actions) - credentials come from environment variables, no browser auth needed
+        mlflow.set_tracking_uri("https://dagshub.com/loveenair28/mlops-architecture.mlflow")
+    else:
+        # Running locally - use DagsHub's interactive browser-based login
+        dagshub.init(repo_owner="loveenair28", repo_name="mlops-architecture", mlflow=True)
 
     train = pd.read_csv("features/train_features.csv")
     X_train = train.drop(columns=["churn", "customer_id", "event_timestamp"])
