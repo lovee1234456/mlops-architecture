@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 
 CATEGORICAL_COLS = ["gender", "education", "marital_status", "contract", "payment_method", "paperless_billing"]
 NUMERIC_COLS_TO_IMPUTE = ["annual_income", "customer_satisfaction", "num_complaints", "avg_monthly_gb", "credit_score"]
@@ -26,6 +27,7 @@ def _encode(df, medians=None):
 def run_feature_engineering():
     # Compute medians from the TRAINING set only — using val/test data to fill values
     # would leak information from data the model shouldn't "see" during training
+    os.makedirs("features", exist_ok=True)
     train_raw = pd.read_csv("data/processed/train.csv")
     medians = {col: train_raw[col].median() for col in NUMERIC_COLS_TO_IMPUTE}
     print("Medians used for imputation (from train set):", medians)

@@ -5,8 +5,10 @@ import pandas as pd
 from xgboost import XGBClassifier
 from sklearn.model_selection import GridSearchCV
 import dagshub
+import os
 
 def train_model():
+    os.makedirs("models", exist_ok=True)
     dagshub.init(repo_owner="loveenair28", repo_name="mlops-architecture", mlflow=True)
 
     train = pd.read_csv("features/train_features.csv")

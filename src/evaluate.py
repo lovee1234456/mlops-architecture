@@ -1,10 +1,12 @@
 import json
 import joblib
 import pandas as pd
+import os
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, precision_recall_curve
 
 def evaluate_model(model_path="models/model.pkl", threshold=0.15):
+    os.makedirs("evaluation", exist_ok=True)
     model = joblib.load(model_path)
     test = pd.read_csv("features/test_features.csv")
     X_test = test.drop(columns=["churn", "customer_id", "event_timestamp"])
