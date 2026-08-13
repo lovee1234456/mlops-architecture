@@ -8,3 +8,5 @@ feature_store/churn_repo/feature_repo/data/online_store.db
 feature_store/churn_repo/feature_repo/__pycache__/ 
 feature_store/churn_repo/churn_repo/__pycache__/ 
 monitoring/logs/*.jsonl 
+monitoring/logs/drift_report.json 
+monitoring/logs/live_features_snapshot.csv 
